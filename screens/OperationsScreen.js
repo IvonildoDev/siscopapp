@@ -32,7 +32,10 @@ function OperationsScreen({
 
     // Props para histórico e estado da operação
     history, setHistory, saveHistory,
-    operationSaved, setOperationSaved
+    operationSaved, setOperationSaved,
+
+    // Navegação
+    navigation
 }) {
     // Estados locais para os campos
     const [localOperationType, setLocalOperationType] = useState(operationType);

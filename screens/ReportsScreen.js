@@ -4,7 +4,8 @@ import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import globalStyles from '../styles/globalStyles';
 
-function ReportsScreen({ history, setHistory, saveHistory }) {
+// Adicionar userData como prop
+function ReportsScreen({ history, setHistory, saveHistory, userData, navigation }) {
     // Função para gerar e compartilhar o relatório com design melhorado
     const generatePDF = async () => {
         console.log("Iniciando geração de relatório...");
@@ -36,6 +37,16 @@ function ReportsScreen({ history, setHistory, saveHistory }) {
             });
             const dateText = `Gerado em: ${dateStr}`;
             reportText += "║" + " ".repeat(2) + dateText + " ".repeat(60 - 2 - dateText.length) + "║\n";
+
+            // NOVO: Adicionar informações do usuário
+            reportText += "║" + "─".repeat(60) + "║\n";
+            reportText += "║" + " DADOS DO RESPONSÁVEL".padEnd(59) + "║\n";
+            reportText += "║" + "─".repeat(60) + "║\n";
+
+            reportText += formatLabelValue("║", "Nome", userData?.name || 'N/A', 60) + "\n";
+            reportText += formatLabelValue("║", "Matrícula", userData?.registration || 'N/A', 60) + "\n";
+            reportText += formatLabelValue("║", "Cargo", userData?.position || 'N/A', 60) + "\n";
+            reportText += formatLabelValue("║", "Equipe", userData?.team || 'N/A', 60) + "\n";
 
             // Linha decorativa inferior do cabeçalho
             reportText += "╚" + "═".repeat(60) + "╝\n\n";
@@ -300,7 +311,7 @@ function ReportsScreen({ history, setHistory, saveHistory }) {
         }
     };
 
-    // Função auxiliar para formatar label e valor em uma linha
+    // Adicionar esta função de formatação caso não exista
     const formatLabelValue = (prefix, label, value, totalWidth) => {
         const labelStr = ` ${label}: `;
         const valueStr = value.toString();

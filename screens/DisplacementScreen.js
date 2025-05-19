@@ -13,7 +13,8 @@ function DisplacementScreen({
     displacementStartTime, setDisplacementStartTime,
     displacementEndTime, setDisplacementEndTime,
     displacementDistance, setDisplacementDistance,
-    isDisplacing, setIsDisplacing
+    isDisplacing, setIsDisplacing,
+    navigation
 }) {
     // Estados locais para armazenar os valores durante a digitação
     const [localOrigin, setLocalOrigin] = useState(origin);
@@ -96,6 +97,9 @@ function DisplacementScreen({
             'Sucesso',
             `Deslocamento finalizado!\nDistância percorrida: ${distance.toFixed(1)} km\nTempo: ${(displacementInfo.duration).toFixed(0)} minutos`
         );
+
+        // Navegar para a tela da aba desejada após finalizar o deslocamento
+        navigation.navigate('Operações');
     };
 
     return (
@@ -107,7 +111,7 @@ function DisplacementScreen({
                     style={globalStyles.input}
                     placeholder="Digite a origem"
                     value={localOrigin}
-                    onChangeText={setLocalOrigin} // Usar estado local
+                    onChangeText={setLocalOrigin}
                     editable={!isDisplacing}
                     returnKeyType="next"
                 />
@@ -116,7 +120,7 @@ function DisplacementScreen({
                     style={globalStyles.input}
                     placeholder="Digite o destino"
                     value={localDestination}
-                    onChangeText={setLocalDestination} // Usar estado local
+                    onChangeText={setLocalDestination}
                     editable={!isDisplacing}
                     returnKeyType="next"
                 />
@@ -125,7 +129,7 @@ function DisplacementScreen({
                     style={globalStyles.input}
                     placeholder="KM Inicial"
                     value={localStartKm}
-                    onChangeText={setLocalStartKm} // Usar estado local
+                    onChangeText={setLocalStartKm}
                     keyboardType="numeric"
                     editable={!isDisplacing}
                     returnKeyType="done"
@@ -135,7 +139,7 @@ function DisplacementScreen({
                     style={globalStyles.input}
                     placeholder="KM Final"
                     value={localEndKm}
-                    onChangeText={setLocalEndKm} // Usar estado local
+                    onChangeText={setLocalEndKm}
                     keyboardType="numeric"
                     editable={isDisplacing}
                     returnKeyType="done"
@@ -165,7 +169,8 @@ function DisplacementScreen({
                     </TouchableOpacity>
                 </View>
 
-                {displacementDistance !== null && (
+                {/* Modificado para mostrar apenas se existir um deslocamento completado */}
+                {displacementDistance > 0 && displacementEndTime && displacementStartTime && (
                     <View style={globalStyles.infoCard}>
                         <Text style={globalStyles.infoTitle}>Último Deslocamento</Text>
                         <Text>Origem: {origin}</Text>

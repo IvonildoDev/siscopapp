@@ -1,27 +1,39 @@
-import { StatusBar } from 'expo-status-bar';
-import React, { useState, useEffect } from 'react';
-import { Platform, Alert, TouchableOpacity, Text, View, StyleSheet } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
+import React, { useState, useEffect, useContext } from 'react';
+import { View, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import * as Location from 'expo-location';
+import { StatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
 
-// Importar telas
+// Screens
 import DisplacementScreen from './screens/DisplacementScreen';
-import MobilizationScreen from './screens/MobilizationScreen';
 import OperationsScreen from './screens/OperationsScreen';
 import ReportsScreen from './screens/ReportsScreen';
+import LoginScreen from './screens/LoginScreen';
+import ProfileScreen from './screens/ProfileScreen';
 
-// Importar utilidades
-import { saveHistory, loadHistory } from './utils/storage';
-// Importar estilos globais
-import globalStyles from './styles/globalStyles';
+// Components
+import UserHeader from './components/UserHeader';
 
-// Criação do TabNavigator
+// Context
+import { AuthProvider, AuthContext } from './context/AuthContext';
+
+// Navegadores
 const Tab = createBottomTabNavigator();
 
-export default function App() {
+// Componente principal com estados de autenticação
+const Main = () => {
+  // Estados para deslocamento
+  const [origin, setOrigin] = useState('');
+  const [destination, setDestination] = useState('');
+  const [startKm, setStartKm] = useState('');
+  const [endKm, setEndKm] = useState('');
+  const [displacementStartTime, setDisplacementStartTime] = useState(null);
+  const [displacementEndTime, setDisplacementEndTime] = useState(null);
+  const [displacementDistance, setDisplacementDistance] = useState(0);
+  const [isDisplacing, setIsDisplacing] = useState(false);
+
   // Estados para operação
   const [operationStart, setOperationStart] = useState(null);
   const [operationEnd, setOperationEnd] = useState(null);
@@ -34,122 +46,49 @@ export default function App() {
   const [pressure, setPressure] = useState('');
   const [activities, setActivities] = useState('');
 
-  // Estados para deslocamento
-  const [origin, setOrigin] = useState('');
-  const [destination, setDestination] = useState('');
-  const [startKm, setStartKm] = useState('');
-  const [endKm, setEndKm] = useState('');
-  const [displacementStartTime, setDisplacementStartTime] = useState(null);
-  const [displacementEndTime, setDisplacementEndTime] = useState(null);
-  const [displacementDistance, setDisplacementDistance] = useState(null);
-  const [isDisplacing, setIsDisplacing] = useState(false);
-
-  // Estados para mobilização
+  // Estados para mobilização e desmobilização
   const [isMobilizando, setIsMobilizando] = useState(false);
   const [mobilizationStartTime, setMobilizationStartTime] = useState(null);
   const [mobilizationEndTime, setMobilizationEndTime] = useState(null);
-  const [mobilizationDuration, setMobilizationDuration] = useState(null);
-
-  // Estados para desmobilização
+  const [mobilizationDuration, setMobilizationDuration] = useState(0);
   const [isDemobilizando, setIsDemobilizando] = useState(false);
   const [demobilizationStartTime, setDemobilizationStartTime] = useState(null);
   const [demobilizationEndTime, setDemobilizationEndTime] = useState(null);
-  const [demobilizationDuration, setDemobilizationDuration] = useState(null);
-
-  // Estado para controlar se a operação foi salva
+  const [demobilizationDuration, setDemobilizationDuration] = useState(0);
   const [operationSaved, setOperationSaved] = useState(false);
 
-  // Estado para histórico
+  // Estados para histórico
   const [history, setHistory] = useState([]);
 
-  // Carregar histórico e verificar permissões ao iniciar
+  // Estados para autenticação
+  const { isLoading, userToken, userData } = useContext(AuthContext);
+
+  // Verificar histórico guardado e carregar
   useEffect(() => {
-    const loadInitialData = async () => {
+    const loadHistory = async () => {
       try {
-        let historyData = await loadHistory();
-
-        // Se for null ou undefined, inicialize como array vazio
-        if (!historyData) historyData = [];
-
-        // Verificar cada item do histórico
-        const validHistory = historyData.filter(item => item !== null && typeof item === 'object');
-
-        // Migrar histórico para garantir que todas as propriedades existam
-        const migratedHistory = validHistory.map(item => {
-          // Criar um novo objeto com propriedades padrão
-          const safeItem = {
-            id: String(item.id || Date.now()),
-            startTime: item.startTime || null,
-            endTime: item.endTime || null,
-            type: item.type || '',
-            city: item.city || '',
-            wellService: item.wellService || '',
-            operator: item.operator || '',
-            volume: item.volume || '',
-            temperature: item.temperature || '',
-            pressure: item.pressure || '',
-            activities: item.activities || '',
-            origin: item.origin || '',
-            destination: item.destination || '',
-            startKm: item.startKm || '',
-            endKm: item.endKm || '',
-
-            // Propriedades relacionadas a mobilização/desmobilização
-            mobilizationStartTime: item.mobilizationStartTime || null,
-            mobilizationEndTime: item.mobilizationEndTime || null,
-            mobilizationDuration: typeof item.mobilizationDuration === 'number' ? item.mobilizationDuration : null,
-            demobilizationStartTime: item.demobilizationStartTime || null,
-            demobilizationEndTime: item.demobilizationEndTime || null,
-            demobilizationDuration: typeof item.demobilizationDuration === 'number' ? item.demobilizationDuration : null
-          };
-
-          return safeItem;
-        });
-
-        // Se houve alterações, salve o histórico migrado
-        if (JSON.stringify(historyData) !== JSON.stringify(migratedHistory)) {
-          console.log("Migração de dados necessária - histórico atualizado");
-          await saveHistory(migratedHistory);
+        const savedHistory = await AsyncStorage.getItem('@operations_history');
+        if (savedHistory !== null) {
+          setHistory(JSON.parse(savedHistory));
         }
-
-        setHistory(migratedHistory);
-        checkPermissions();
       } catch (error) {
-        console.error("Erro crítico na inicialização:", error);
-        // Em caso de erro grave, inicialize com um histórico vazio
-        setHistory([]);
-        Alert.alert('Erro', 'Houve um problema ao carregar o histórico. Os dados foram redefinidos.');
+        console.error('Erro ao carregar histórico:', error);
       }
     };
 
-    loadInitialData();
+    loadHistory();
   }, []);
 
-  // Verificar permissões de localização
-  const checkPermissions = async () => {
+  // Função para salvar histórico
+  const saveHistory = async (newHistory) => {
     try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Aviso', 'Permissão de localização não concedida. Algumas funcionalidades podem ser limitadas.');
-      }
+      await AsyncStorage.setItem('@operations_history', JSON.stringify(newHistory));
     } catch (error) {
-      console.log('Erro ao verificar permissões:', error);
+      console.error('Erro ao salvar histórico:', error);
     }
   };
 
-  // Função para redefinir o aplicativo
-  const resetApp = async () => {
-    try {
-      await AsyncStorage.removeItem('@operations_history');
-      setHistory([]);
-      Alert.alert('Sucesso', 'Histórico limpo. Reinicie o aplicativo.');
-    } catch (e) {
-      console.error("Erro ao redefinir app:", e);
-      Alert.alert('Erro', 'Falha ao limpar o histórico');
-    }
-  };
-
-  // Renderização condicional das telas com props
+  // Componentes de tela como funções para passar props
   const RenderDisplacementScreen = () => (
     <DisplacementScreen
       origin={origin}
@@ -171,35 +110,9 @@ export default function App() {
     />
   );
 
-  const RenderMobilizationScreen = () => (
-    <MobilizationScreen
-      origin={origin}
-      destination={destination}
-      displacementDistance={displacementDistance}
-      displacementEndTime={displacementEndTime}
-      isMobilizando={isMobilizando}
-      setIsMobilizando={setIsMobilizando}
-      isDemobilizando={isDemobilizando}
-      setIsDemobilizando={setIsDemobilizando}
-      mobilizationStartTime={mobilizationStartTime}
-      setMobilizationStartTime={setMobilizationStartTime}
-      mobilizationEndTime={mobilizationEndTime}
-      setMobilizationEndTime={setMobilizationEndTime}
-      mobilizationDuration={mobilizationDuration}
-      setMobilizationDuration={setMobilizationDuration}
-      operationSaved={operationSaved}
-      demobilizationStartTime={demobilizationStartTime}
-      setDemobilizationStartTime={setDemobilizationStartTime}
-      demobilizationEndTime={demobilizationEndTime}
-      setDemobilizationEndTime={setDemobilizationEndTime}
-      demobilizationDuration={demobilizationDuration}
-      setDemobilizationDuration={setDemobilizationDuration}
-    />
-  );
-
   const RenderOperationsScreen = () => (
     <OperationsScreen
-      // Props existentes
+      // Props existentes para operação
       operationStart={operationStart}
       setOperationStart={setOperationStart}
       operationEnd={operationEnd}
@@ -221,13 +134,13 @@ export default function App() {
       activities={activities}
       setActivities={setActivities}
 
-      // Props de deslocamento
+      // Props para deslocamento
       origin={origin}
       destination={destination}
       startKm={startKm}
       endKm={endKm}
 
-      // Props de mobilização
+      // Props para mobilização
       mobilizationStartTime={mobilizationStartTime}
       setMobilizationStartTime={setMobilizationStartTime}
       mobilizationEndTime={mobilizationEndTime}
@@ -237,7 +150,7 @@ export default function App() {
       isMobilizando={isMobilizando}
       setIsMobilizando={setIsMobilizando}
 
-      // Props de desmobilização
+      // Props para desmobilização
       demobilizationStartTime={demobilizationStartTime}
       setDemobilizationStartTime={setDemobilizationStartTime}
       demobilizationEndTime={demobilizationEndTime}
@@ -261,45 +174,83 @@ export default function App() {
       history={history}
       setHistory={setHistory}
       saveHistory={saveHistory}
+      userData={userData} // Adicionamos os dados do usuário aqui
     />
   );
 
+  // Se estiver carregando, mostrar uma tela de carregamento
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text>Carregando...</Text>
+      </View>
+    );
+  }
+
+  // Se não estiver autenticado, mostrar a tela de login
+  if (!userToken) {
+    return <LoginScreen />;
+  }
+
+  // Se estiver autenticado, mostrar o aplicativo normal
   return (
-    <NavigationContainer>
+    <View style={{ flex: 1 }}>
       <StatusBar style="auto" />
-      <Tab.Navigator
-        screenOptions={({ route }) => ({
-          tabBarIcon: ({ focused, color, size }) => {
-            let iconName;
+      <UserHeader />
+      <NavigationContainer>
+        <Tab.Navigator
+          screenOptions={({ route }) => ({
+            headerShown: false,
+            tabBarIcon: ({ focused, color, size }) => {
+              let iconName;
 
-            if (route.name === 'Deslocamento') {
-              iconName = focused ? 'road' : 'road';
-            } else if (route.name === 'Mobilização') {
-              iconName = focused ? 'arrow-circle-up' : 'arrow-circle-up';
-            } else if (route.name === 'Operações') {
-              iconName = focused ? 'cogs' : 'cogs';
-            } else if (route.name === 'Relatórios') {
-              iconName = focused ? 'file-text' : 'file-text';
-            }
+              if (route.name === 'Deslocamento') {
+                iconName = focused ? 'car' : 'car-outline';
+              } else if (route.name === 'Operações') {
+                iconName = focused ? 'construct' : 'construct-outline';
+              } else if (route.name === 'Relatórios') {
+                iconName = focused ? 'document-text' : 'document-text-outline';
+              } else if (route.name === 'Perfil') {
+                iconName = focused ? 'person' : 'person-outline';
+              }
 
-            return <FontAwesome name={iconName} size={size} color={color} />;
-          },
-          tabBarActiveTintColor: '#e91e63',
-          tabBarInactiveTintColor: 'gray',
-        })}
-      >
-        <Tab.Screen name="Deslocamento" component={RenderDisplacementScreen} />
-        <Tab.Screen name="Operações" component={RenderOperationsScreen} />
-        <Tab.Screen name="Relatórios" component={RenderReportsScreen} />
-      </Tab.Navigator>
-    </NavigationContainer>
+              return <Ionicons name={iconName} size={size} color={color} />;
+            },
+            tabBarActiveTintColor: 'tomato', // Correto para v7
+            tabBarInactiveTintColor: 'gray', // Correto para v7
+          })}
+        >
+          <Tab.Screen
+            name="Deslocamento"
+            component={RenderDisplacementScreen}
+            options={{ unmountOnBlur: true }}
+          />
+          <Tab.Screen
+            name="Operações"
+            component={RenderOperationsScreen}
+            options={{ unmountOnBlur: true }}
+          />
+          <Tab.Screen
+            name="Relatórios"
+            component={RenderReportsScreen}
+            options={{ unmountOnBlur: true }}
+          />
+          <Tab.Screen
+            name="Perfil"
+            component={ProfileScreen}
+            options={{ unmountOnBlur: true }}
+          />
+        </Tab.Navigator>
+      </NavigationContainer>
+    </View>
+  );
+};
+
+// Componente raiz que provê o contexto de autenticação
+export default function App() {
+  return (
+    <AuthProvider>
+      <Main />
+    </AuthProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
