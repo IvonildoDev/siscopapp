@@ -463,6 +463,30 @@ function ReportsScreen({ history, setHistory, saveHistory, userData, navigation 
                 {item.activities && (
                     <Text>Atividades: {item.activities}</Text>
                 )}
+
+                {/* Períodos de Aguardo */}
+                {item.waitingPeriods && item.waitingPeriods.length > 0 && (
+                    <View style={styles.detailSection}>
+                        <Text style={styles.detailSectionTitle}>Períodos de Aguardo</Text>
+                        {item.waitingPeriods.map((period, i) => (
+                            <View key={i} style={styles.waitingPeriodItem}>
+                                <Text style={styles.waitingPeriodTitle}>Aguardo {i + 1}</Text>
+                                <Text>Início: {new Date(period.startTime).toLocaleString()}</Text>
+                                <Text>Fim: {new Date(period.endTime).toLocaleString()}</Text>
+                                <Text>Duração: {period.duration.toFixed(0)} minutos</Text>
+                                <Text style={styles.reasonsTitle}>Motivos:</Text>
+                                {period.reasons && period.reasons.map((reason, j) => (
+                                    <View key={j} style={styles.reasonItem}>
+                                        <Text>{reason.reason}</Text>
+                                    </View>
+                                ))}
+                            </View>
+                        ))}
+                        <Text style={styles.totalWaitingTime}>
+                            Tempo Total de Aguardo: {item.totalWaitingTime ? item.totalWaitingTime.toFixed(0) : 0} minutos
+                        </Text>
+                    </View>
+                )}
             </View>
         );
     };
@@ -530,5 +554,42 @@ function ReportsScreen({ history, setHistory, saveHistory, userData, navigation 
         </ScrollView>
     );
 }
+
+const styles = {
+    waitingPeriodItem: {
+        backgroundColor: '#f8f9fa',
+        padding: 10,
+        borderRadius: 5,
+        marginVertical: 5,
+        borderLeftWidth: 3,
+        borderLeftColor: '#e74c3c',
+    },
+    waitingPeriodTitle: {
+        fontWeight: 'bold',
+        fontSize: 14,
+        marginBottom: 5,
+        color: '#2c3e50',
+    },
+    reasonsTitle: {
+        fontWeight: 'bold',
+        marginTop: 5,
+        fontSize: 13,
+        color: '#34495e',
+    },
+    reasonItem: {
+        backgroundColor: '#fff',
+        padding: 6,
+        borderRadius: 4,
+        marginVertical: 3,
+        borderLeftWidth: 2,
+        borderLeftColor: '#3498db',
+    },
+    totalWaitingTime: {
+        fontWeight: 'bold',
+        marginTop: 10,
+        fontSize: 14,
+        color: '#e74c3c',
+    },
+};
 
 export default ReportsScreen;

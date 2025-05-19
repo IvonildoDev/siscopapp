@@ -12,6 +12,7 @@ import OperationsScreen from './screens/OperationsScreen';
 import ReportsScreen from './screens/ReportsScreen';
 import LoginScreen from './screens/LoginScreen';
 import ProfileScreen from './screens/ProfileScreen';
+import WaitingScreen from './screens/WaitingScreen';
 
 // Components
 import UserHeader from './components/UserHeader';
@@ -62,6 +63,13 @@ const Main = () => {
 
   // Estados para autenticação
   const { isLoading, userToken, userData } = useContext(AuthContext);
+
+  // Estados para aguardo
+  const [isWaiting, setIsWaiting] = useState(false);
+  const [waitingStartTime, setWaitingStartTime] = useState(null);
+  const [waitingEndTime, setWaitingEndTime] = useState(null);
+  const [waitingDuration, setWaitingDuration] = useState(0);
+  const [waitingReasons, setWaitingReasons] = useState([]);
 
   // Verificar histórico guardado e carregar
   useEffect(() => {
@@ -178,6 +186,24 @@ const Main = () => {
     />
   );
 
+  const RenderWaitingScreen = () => (
+    <WaitingScreen
+      isWaiting={isWaiting}
+      setIsWaiting={setIsWaiting}
+      waitingStartTime={waitingStartTime}
+      setWaitingStartTime={setWaitingStartTime}
+      waitingEndTime={waitingEndTime}
+      setWaitingEndTime={setWaitingEndTime}
+      waitingDuration={waitingDuration}
+      setWaitingDuration={setWaitingDuration}
+      waitingReasons={waitingReasons}
+      setWaitingReasons={setWaitingReasons}
+      history={history}
+      setHistory={setHistory}
+      saveHistory={saveHistory}
+    />
+  );
+
   // Se estiver carregando, mostrar uma tela de carregamento
   if (isLoading) {
     return (
@@ -208,6 +234,8 @@ const Main = () => {
                 iconName = focused ? 'car' : 'car-outline';
               } else if (route.name === 'Operações') {
                 iconName = focused ? 'construct' : 'construct-outline';
+              } else if (route.name === 'Aguardando') {
+                iconName = focused ? 'time' : 'time-outline';
               } else if (route.name === 'Relatórios') {
                 iconName = focused ? 'document-text' : 'document-text-outline';
               } else if (route.name === 'Perfil') {
@@ -228,6 +256,11 @@ const Main = () => {
           <Tab.Screen
             name="Operações"
             component={RenderOperationsScreen}
+            options={{ unmountOnBlur: true }}
+          />
+          <Tab.Screen
+            name="Aguardando"
+            component={RenderWaitingScreen}
             options={{ unmountOnBlur: true }}
           />
           <Tab.Screen
