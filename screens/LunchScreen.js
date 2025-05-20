@@ -203,14 +203,20 @@ const LunchScreen = ({
                                 <View style={styles.historyDetail}>
                                     <Text style={styles.historyLabel}>Início:</Text>
                                     <Text style={styles.historyValue}>
-                                        {new Date(lunch.startTime).toLocaleString()}
+                                        {new Date(lunch.startTime).toLocaleTimeString('pt-BR', {
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
                                     </Text>
                                 </View>
 
                                 <View style={styles.historyDetail}>
                                     <Text style={styles.historyLabel}>Fim:</Text>
                                     <Text style={styles.historyValue}>
-                                        {new Date(lunch.endTime).toLocaleString()}
+                                        {new Date(lunch.endTime).toLocaleTimeString('pt-BR', {
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
                                     </Text>
                                 </View>
 

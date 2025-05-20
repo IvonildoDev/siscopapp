@@ -263,8 +263,6 @@ const Main = () => {
                 iconName = focused ? 'restaurant' : 'restaurant-outline';
               } else if (route.name === 'Relatórios') {
                 iconName = focused ? 'document-text' : 'document-text-outline';
-              } else if (route.name === 'Perfil') {
-                iconName = focused ? 'person' : 'person-outline';
               }
 
               return <Ionicons name={iconName} size={size} color={color} />;
@@ -296,11 +294,6 @@ const Main = () => {
           <Tab.Screen
             name="Relatórios"
             component={RenderReportsScreen}
-            options={{ unmountOnBlur: true }}
-          />
-          <Tab.Screen
-            name="Perfil"
-            component={ProfileScreen}
             options={{ unmountOnBlur: true }}
           />
         </Tab.Navigator>

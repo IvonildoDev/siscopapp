@@ -209,7 +209,10 @@ const WaitingScreen = ({
                             <View key={index} style={styles.historyItem}>
                                 <Text style={styles.historyReason}>{item.reason}</Text>
                                 <Text style={styles.historyTimestamp}>
-                                    {new Date(item.timestamp).toLocaleString()}
+                                    {new Date(item.timestamp).toLocaleTimeString('pt-BR', {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    })}
                                 </Text>
                             </View>
                         ))}

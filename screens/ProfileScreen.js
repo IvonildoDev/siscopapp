@@ -12,7 +12,7 @@ import { AuthContext } from '../context/AuthContext';
 import globalStyles from '../styles/globalStyles';
 import { Ionicons } from '@expo/vector-icons';
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ closeModal }) => {
     const { userData, updateUserData, logout } = useContext(AuthContext);
 
     const [name, setName] = useState(userData.name || '');
@@ -65,12 +65,14 @@ const ProfileScreen = () => {
         }
     };
 
+    // Função para fazer logout e fechar o modal
+    const handleLogout = () => {
+        if (closeModal) closeModal();
+        logout();
+    };
+
     return (
         <ScrollView style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.headerTitle}>Perfil do Usuário</Text>
-            </View>
-
             <View style={styles.profileContainer}>
                 <View style={styles.avatarContainer}>
                     <View style={styles.avatar}>
@@ -155,12 +157,14 @@ const ProfileScreen = () => {
                         )}
                     </View>
 
-                    <TouchableOpacity
-                        style={[styles.button, styles.logoutButton]}
-                        onPress={logout}
-                    >
-                        <Text style={styles.buttonText}>Sair do Aplicativo</Text>
-                    </TouchableOpacity>
+                    {closeModal && (
+                        <TouchableOpacity
+                            style={[styles.button, styles.closeButton]}
+                            onPress={closeModal}
+                        >
+                            <Text style={styles.buttonText}>Voltar</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
             </View>
         </ScrollView>
@@ -168,20 +172,9 @@ const ProfileScreen = () => {
 };
 
 const styles = StyleSheet.create({
-    // Estilos mantidos iguais
     container: {
         flex: 1,
         backgroundColor: '#f5f5f5',
-    },
-    header: {
-        padding: 15,
-        backgroundColor: '#2c3e50',
-    },
-    headerTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#fff',
-        textAlign: 'center',
     },
     profileContainer: {
         margin: 15,
@@ -257,8 +250,8 @@ const styles = StyleSheet.create({
     saveButton: {
         backgroundColor: '#2ecc71',
     },
-    logoutButton: {
-        backgroundColor: '#e74c3c',
+    closeButton: {
+        backgroundColor: '#34495e',
     },
     disabledButton: {
         backgroundColor: '#95a5a6',

@@ -162,7 +162,10 @@ function ReportsScreen({ history, setHistory, saveHistory, userData, navigation 
 
                         try {
                             const mobilizationStartStr = item.mobilizationStartTime ?
-                                new Date(item.mobilizationStartTime).toLocaleString('pt-BR') : 'N/A';
+                                new Date(item.mobilizationStartTime).toLocaleTimeString('pt-BR', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                }) : 'N/A';
                             text += formatLabelValue("┃", "Início", mobilizationStartStr, 60) + "\n";
                         } catch (e) {
                             text += formatLabelValue("┃", "Início", "N/A (erro formato)", 60) + "\n";
@@ -170,7 +173,10 @@ function ReportsScreen({ history, setHistory, saveHistory, userData, navigation 
 
                         try {
                             const mobilizationEndStr = item.mobilizationEndTime ?
-                                new Date(item.mobilizationEndTime).toLocaleString('pt-BR') : 'N/A';
+                                new Date(item.mobilizationEndTime).toLocaleTimeString('pt-BR', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                }) : 'N/A';
                             text += formatLabelValue("┃", "Fim", mobilizationEndStr, 60) + "\n";
                         } catch (e) {
                             text += formatLabelValue("┃", "Fim", "N/A (erro formato)", 60) + "\n";
@@ -196,7 +202,10 @@ function ReportsScreen({ history, setHistory, saveHistory, userData, navigation 
 
                         try {
                             const demobilizationStartStr = item.demobilizationStartTime ?
-                                new Date(item.demobilizationStartTime).toLocaleString('pt-BR') : 'N/A';
+                                new Date(item.demobilizationStartTime).toLocaleTimeString('pt-BR', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                }) : 'N/A';
                             text += formatLabelValue("┃", "Início", demobilizationStartStr, 60) + "\n";
                         } catch (e) {
                             text += formatLabelValue("┃", "Início", "N/A (erro formato)", 60) + "\n";
@@ -204,7 +213,10 @@ function ReportsScreen({ history, setHistory, saveHistory, userData, navigation 
 
                         try {
                             const demobilizationEndStr = item.demobilizationEndTime ?
-                                new Date(item.demobilizationEndTime).toLocaleString('pt-BR') : 'N/A';
+                                new Date(item.demobilizationEndTime).toLocaleTimeString('pt-BR', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                }) : 'N/A';
                             text += formatLabelValue("┃", "Fim", demobilizationEndStr, 60) + "\n";
                         } catch (e) {
                             text += formatLabelValue("┃", "Fim", "N/A (erro formato)", 60) + "\n";
@@ -228,8 +240,26 @@ function ReportsScreen({ history, setHistory, saveHistory, userData, navigation 
                         text += "┃" + "─".repeat(60) + "┃\n";
 
                         item.lunchBreaks.forEach((lunch, i) => {
-                            text += formatLabelValue("┃", `Almoço ${i + 1} - Início`, new Date(lunch.startTime).toLocaleString('pt-BR'), 60) + "\n";
-                            text += formatLabelValue("┃", `Almoço ${i + 1} - Fim`, new Date(lunch.endTime).toLocaleString('pt-BR'), 60) + "\n";
+                            try {
+                                const startTimeStr = new Date(lunch.startTime).toLocaleTimeString('pt-BR', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                });
+                                text += formatLabelValue("┃", `Almoço ${i + 1} - Início`, startTimeStr, 60) + "\n";
+                            } catch (e) {
+                                text += formatLabelValue("┃", `Almoço ${i + 1} - Início`, "Horário inválido", 60) + "\n";
+                            }
+
+                            try {
+                                const endTimeStr = new Date(lunch.endTime).toLocaleTimeString('pt-BR', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                });
+                                text += formatLabelValue("┃", `Almoço ${i + 1} - Fim`, endTimeStr, 60) + "\n";
+                            } catch (e) {
+                                text += formatLabelValue("┃", `Almoço ${i + 1} - Fim`, "Horário inválido", 60) + "\n";
+                            }
+
                             text += formatLabelValue("┃", `Almoço ${i + 1} - Duração`, `${lunch.duration.toFixed(0)} minutos`, 60) + "\n";
 
                             if (i < item.lunchBreaks.length - 1) {
@@ -347,6 +377,19 @@ function ReportsScreen({ history, setHistory, saveHistory, userData, navigation 
         }
     };
 
+    // Função para formatar apenas a hora:minuto de uma data
+    const formatTimeOnly = (dateString) => {
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleTimeString('pt-BR', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (e) {
+            return 'Horário inválido';
+        }
+    };
+
     // Renderizar item do histórico com verificações seguras
     const renderHistoryItem = ({ item, index }) => {
         // Se o item não existir, mostrar mensagem de erro
@@ -422,22 +465,13 @@ function ReportsScreen({ history, setHistory, saveHistory, userData, navigation 
                         <View style={globalStyles.timeItem}>
                             <Text>Mobilização:</Text>
 
-                            {/* Horários com tratamento de erro */}
-                            {item.mobilizationStartTime && (() => {
-                                try {
-                                    return <Text>Início: {new Date(item.mobilizationStartTime).toLocaleString()}</Text>;
-                                } catch (e) {
-                                    return <Text>Início: Data inválida</Text>;
-                                }
-                            })()}
+                            {item.mobilizationStartTime && (
+                                <Text>Início: {formatTimeOnly(item.mobilizationStartTime)}</Text>
+                            )}
 
-                            {item.mobilizationEndTime && (() => {
-                                try {
-                                    return <Text>Fim: {new Date(item.mobilizationEndTime).toLocaleString()}</Text>;
-                                } catch (e) {
-                                    return <Text>Fim: Data inválida</Text>;
-                                }
-                            })()}
+                            {item.mobilizationEndTime && (
+                                <Text>Fim: {formatTimeOnly(item.mobilizationEndTime)}</Text>
+                            )}
 
                             <Text>Duração: {item.mobilizationDuration.toFixed(0)} minutos</Text>
                         </View>
@@ -449,22 +483,13 @@ function ReportsScreen({ history, setHistory, saveHistory, userData, navigation 
                         <View style={globalStyles.timeItem}>
                             <Text>Desmobilização:</Text>
 
-                            {/* Horários com tratamento de erro */}
-                            {item.demobilizationStartTime && (() => {
-                                try {
-                                    return <Text>Início: {new Date(item.demobilizationStartTime).toLocaleString()}</Text>;
-                                } catch (e) {
-                                    return <Text>Início: Data inválida</Text>;
-                                }
-                            })()}
+                            {item.demobilizationStartTime && (
+                                <Text>Início: {formatTimeOnly(item.demobilizationStartTime)}</Text>
+                            )}
 
-                            {item.demobilizationEndTime && (() => {
-                                try {
-                                    return <Text>Fim: {new Date(item.demobilizationEndTime).toLocaleString()}</Text>;
-                                } catch (e) {
-                                    return <Text>Fim: Data inválida</Text>;
-                                }
-                            })()}
+                            {item.demobilizationEndTime && (
+                                <Text>Fim: {formatTimeOnly(item.demobilizationEndTime)}</Text>
+                            )}
 
                             <Text>Duração: {item.demobilizationDuration.toFixed(0)} minutos</Text>
                         </View>
@@ -492,10 +517,10 @@ function ReportsScreen({ history, setHistory, saveHistory, userData, navigation 
                         {item.waitingPeriods.map((period, i) => (
                             <View key={i} style={styles.waitingPeriodItem}>
                                 <Text style={styles.waitingPeriodTitle}>Aguardo {i + 1}</Text>
-                                <Text>Início: {new Date(period.startTime).toLocaleString()}</Text>
-                                <Text>Fim: {new Date(period.endTime).toLocaleString()}</Text>
+                                <Text>Início: {formatTimeOnly(period.startTime)}</Text>
+                                <Text>Fim: {formatTimeOnly(period.endTime)}</Text>
                                 <Text>Duração: {period.duration.toFixed(0)} minutos</Text>
-                                <Text style={styles.reasonsTitle}>Motivos:</Text>
+                                <Text style={styles.reasonsTitle}>Motivo:</Text>
                                 {period.reasons && period.reasons.map((reason, j) => (
                                     <View key={j} style={styles.reasonItem}>
                                         <Text>{reason.reason}</Text>
@@ -516,8 +541,8 @@ function ReportsScreen({ history, setHistory, saveHistory, userData, navigation 
                         {item.lunchBreaks.map((lunch, i) => (
                             <View key={i} style={styles.lunchBreakItem}>
                                 <Text style={styles.lunchBreakTitle}>Almoço {i + 1}</Text>
-                                <Text>Início: {new Date(lunch.startTime).toLocaleString()}</Text>
-                                <Text>Fim: {new Date(lunch.endTime).toLocaleString()}</Text>
+                                <Text>Início: {formatTimeOnly(lunch.startTime)}</Text>
+                                <Text>Fim: {formatTimeOnly(lunch.endTime)}</Text>
                                 <Text>Duração: {lunch.duration.toFixed(0)} minutos</Text>
                             </View>
                         ))}
