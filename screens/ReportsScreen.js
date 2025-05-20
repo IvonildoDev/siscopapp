@@ -221,6 +221,27 @@ function ReportsScreen({ history, setHistory, saveHistory, userData, navigation 
                     // Separador para próxima seção
                     text += "┃" + "─".repeat(60) + "┃\n";
 
+                    // Seção de intervalos de almoço
+                    if (item.lunchBreaks && item.lunchBreaks.length > 0) {
+                        text += "┃" + "─".repeat(60) + "┃\n";
+                        text += "┃" + " INTERVALOS DE ALMOÇO".padEnd(59) + "┃\n";
+                        text += "┃" + "─".repeat(60) + "┃\n";
+
+                        item.lunchBreaks.forEach((lunch, i) => {
+                            text += formatLabelValue("┃", `Almoço ${i + 1} - Início`, new Date(lunch.startTime).toLocaleString('pt-BR'), 60) + "\n";
+                            text += formatLabelValue("┃", `Almoço ${i + 1} - Fim`, new Date(lunch.endTime).toLocaleString('pt-BR'), 60) + "\n";
+                            text += formatLabelValue("┃", `Almoço ${i + 1} - Duração`, `${lunch.duration.toFixed(0)} minutos`, 60) + "\n";
+
+                            if (i < item.lunchBreaks.length - 1) {
+                                text += "┃" + "· ".repeat(30) + "┃\n";
+                            }
+                        });
+
+                        if (item.totalLunchTime) {
+                            text += formatLabelValue("┃", "Tempo Total de Almoço", `${item.totalLunchTime.toFixed(0)} minutos`, 60) + "\n";
+                        }
+                    }
+
                     // Tempo total
                     if (item.mobilizationDuration != null &&
                         typeof item.mobilizationDuration === 'number' &&
@@ -487,6 +508,24 @@ function ReportsScreen({ history, setHistory, saveHistory, userData, navigation 
                         </Text>
                     </View>
                 )}
+
+                {/* Intervalos de Almoço */}
+                {item.lunchBreaks && item.lunchBreaks.length > 0 && (
+                    <View style={styles.detailSection}>
+                        <Text style={styles.detailSectionTitle}>Intervalos de Almoço</Text>
+                        {item.lunchBreaks.map((lunch, i) => (
+                            <View key={i} style={styles.lunchBreakItem}>
+                                <Text style={styles.lunchBreakTitle}>Almoço {i + 1}</Text>
+                                <Text>Início: {new Date(lunch.startTime).toLocaleString()}</Text>
+                                <Text>Fim: {new Date(lunch.endTime).toLocaleString()}</Text>
+                                <Text>Duração: {lunch.duration.toFixed(0)} minutos</Text>
+                            </View>
+                        ))}
+                        <Text style={styles.totalLunchTime}>
+                            Tempo Total de Almoço: {item.totalLunchTime ? item.totalLunchTime.toFixed(0) : 0} minutos
+                        </Text>
+                    </View>
+                )}
             </View>
         );
     };
@@ -589,6 +628,26 @@ const styles = {
         marginTop: 10,
         fontSize: 14,
         color: '#e74c3c',
+    },
+    lunchBreakItem: {
+        backgroundColor: '#fef9e7',
+        padding: 10,
+        borderRadius: 5,
+        marginVertical: 5,
+        borderLeftWidth: 3,
+        borderLeftColor: '#e67e22',
+    },
+    lunchBreakTitle: {
+        fontWeight: 'bold',
+        fontSize: 14,
+        marginBottom: 5,
+        color: '#2c3e50',
+    },
+    totalLunchTime: {
+        fontWeight: 'bold',
+        marginTop: 10,
+        fontSize: 14,
+        color: '#e67e22',
     },
 };
 

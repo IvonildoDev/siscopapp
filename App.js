@@ -13,6 +13,7 @@ import ReportsScreen from './screens/ReportsScreen';
 import LoginScreen from './screens/LoginScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import WaitingScreen from './screens/WaitingScreen';
+import LunchScreen from './screens/LunchScreen';
 
 // Components
 import UserHeader from './components/UserHeader';
@@ -70,6 +71,12 @@ const Main = () => {
   const [waitingEndTime, setWaitingEndTime] = useState(null);
   const [waitingDuration, setWaitingDuration] = useState(0);
   const [waitingReasons, setWaitingReasons] = useState([]);
+
+  // Estados para controle de almoço
+  const [isLunchBreak, setIsLunchBreak] = useState(false);
+  const [lunchStartTime, setLunchStartTime] = useState(null);
+  const [lunchEndTime, setLunchEndTime] = useState(null);
+  const [lunchDuration, setLunchDuration] = useState(0);
 
   // Verificar histórico guardado e carregar
   useEffect(() => {
@@ -204,6 +211,22 @@ const Main = () => {
     />
   );
 
+  const RenderLunchScreen = () => (
+    <LunchScreen
+      isLunchBreak={isLunchBreak}
+      setIsLunchBreak={setIsLunchBreak}
+      lunchStartTime={lunchStartTime}
+      setLunchStartTime={setLunchStartTime}
+      lunchEndTime={lunchEndTime}
+      setLunchEndTime={setLunchEndTime}
+      lunchDuration={lunchDuration}
+      setLunchDuration={setLunchDuration}
+      history={history}
+      setHistory={setHistory}
+      saveHistory={saveHistory}
+    />
+  );
+
   // Se estiver carregando, mostrar uma tela de carregamento
   if (isLoading) {
     return (
@@ -236,6 +259,8 @@ const Main = () => {
                 iconName = focused ? 'construct' : 'construct-outline';
               } else if (route.name === 'Aguardando') {
                 iconName = focused ? 'time' : 'time-outline';
+              } else if (route.name === 'Almoço') {
+                iconName = focused ? 'restaurant' : 'restaurant-outline';
               } else if (route.name === 'Relatórios') {
                 iconName = focused ? 'document-text' : 'document-text-outline';
               } else if (route.name === 'Perfil') {
@@ -261,6 +286,11 @@ const Main = () => {
           <Tab.Screen
             name="Aguardando"
             component={RenderWaitingScreen}
+            options={{ unmountOnBlur: true }}
+          />
+          <Tab.Screen
+            name="Almoço"
+            component={RenderLunchScreen}
             options={{ unmountOnBlur: true }}
           />
           <Tab.Screen
