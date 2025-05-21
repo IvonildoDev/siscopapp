@@ -14,6 +14,7 @@ import LoginScreen from './screens/LoginScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import WaitingScreen from './screens/WaitingScreen';
 import LunchScreen from './screens/LunchScreen';
+import RefuelingScreen from './screens/RefuelingScreen';
 
 // Components
 import UserHeader from './components/UserHeader';
@@ -77,6 +78,14 @@ const Main = () => {
   const [lunchStartTime, setLunchStartTime] = useState(null);
   const [lunchEndTime, setLunchEndTime] = useState(null);
   const [lunchDuration, setLunchDuration] = useState(0);
+
+  // Estados para abastecimento
+  const [isRefueling, setIsRefueling] = useState(false);
+  const [refuelingStartTime, setRefuelingStartTime] = useState(null);
+  const [refuelingEndTime, setRefuelingEndTime] = useState(null);
+  const [refuelingDuration, setRefuelingDuration] = useState(0);
+  const [refuelingType, setRefuelingType] = useState('');
+  const [refuelingHistory, setRefuelingHistory] = useState([]);
 
   // Verificar histórico guardado e carregar
   useEffect(() => {
@@ -227,6 +236,26 @@ const Main = () => {
     />
   );
 
+  const RenderRefuelingScreen = () => (
+    <RefuelingScreen
+      isRefueling={isRefueling}
+      setIsRefueling={setIsRefueling}
+      refuelingStartTime={refuelingStartTime}
+      setRefuelingStartTime={setRefuelingStartTime}
+      refuelingEndTime={refuelingEndTime}
+      setRefuelingEndTime={setRefuelingEndTime}
+      refuelingDuration={refuelingDuration}
+      setRefuelingDuration={setRefuelingDuration}
+      refuelingType={refuelingType}
+      setRefuelingType={setRefuelingType}
+      refuelingHistory={refuelingHistory}
+      setRefuelingHistory={setRefuelingHistory}
+      history={history}
+      setHistory={setHistory}
+      saveHistory={saveHistory}
+    />
+  );
+
   // Se estiver carregando, mostrar uma tela de carregamento
   if (isLoading) {
     return (
@@ -261,6 +290,8 @@ const Main = () => {
                 iconName = focused ? 'time' : 'time-outline';
               } else if (route.name === 'Almoço') {
                 iconName = focused ? 'restaurant' : 'restaurant-outline';
+              } else if (route.name === 'Abastecimento') {
+                iconName = focused ? 'car-sport' : 'car-sport-outline';
               } else if (route.name === 'Relatórios') {
                 iconName = focused ? 'document-text' : 'document-text-outline';
               }
@@ -289,6 +320,11 @@ const Main = () => {
           <Tab.Screen
             name="Almoço"
             component={RenderLunchScreen}
+            options={{ unmountOnBlur: true }}
+          />
+          <Tab.Screen
+            name="Abastecimento"
+            component={RenderRefuelingScreen}
             options={{ unmountOnBlur: true }}
           />
           <Tab.Screen
