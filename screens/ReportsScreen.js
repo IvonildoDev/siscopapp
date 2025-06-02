@@ -1,15 +1,28 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, FlatList, Alert, Platform } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, FlatList, Alert, ActivityIndicator } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import * as Print from 'expo-print';
 import globalStyles from '../styles/globalStyles';
+import { fetchOperationsFromFirebase } from '../utils/fetchOperations'; // <-- Adicione isso
 
-// Adicionar userData como prop
-function ReportsScreen({ history, setHistory, saveHistory, userData, navigation }) {
+function ReportsScreen({ userData, navigation }) {
+    const [history, setHistory] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const loadData = async () => {
+            setLoading(true);
+            const ops = await fetchOperationsFromFirebase();
+            setHistory(ops);
+            setLoading(false);
+        };
+        loadData();
+    }, []);
+
     // Função para gerar e compartilhar o relatório em PDF
     const generatePDF = async () => {
-        console.log("Iniciando geração de relatório PDF...");
+        console.log("HISTÓRICO PARA O RELATÓRIO:", history);
         // Verificar se history existe e tem itens
         if (!history || !Array.isArray(history) || history.length === 0) {
             Alert.alert('Aviso', 'Não há operações para gerar relatório');
@@ -1003,6 +1016,13 @@ function ReportsScreen({ history, setHistory, saveHistory, userData, navigation 
                     </TouchableOpacity>
                 </View>
             </View>
+
+            {loading && (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <ActivityIndicator size="large" color="#007bff" />
+                    <Text>Carregando operações do banco...</Text>
+                </View>
+            )}
         </ScrollView>
     );
 }

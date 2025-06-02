@@ -38,14 +38,14 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     // Funções de autenticação
-    const login = async (name, registration, position = 'Operador', auxiliarName = '') => {
+    const login = async (name, position, unit, vehiclePlate, auxiliarName) => {
         try {
             // Em um sistema real, você faria uma requisição para API aqui
             // Simulando um token simples para este exemplo
             const token = `${name}-${Date.now()}`;
 
             // Dados do usuário para armazenar
-            const user = { name, registration, position, auxiliarName };
+            const user = { name, position, unit, vehiclePlate, auxiliarName };
 
             // Salvar no AsyncStorage
             await AsyncStorage.setItem('userToken', token);

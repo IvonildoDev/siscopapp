@@ -14,14 +14,15 @@ import { AuthContext } from '../context/AuthContext';
 
 const LoginScreen = () => {
     const [name, setName] = useState('');
-    const [registration, setRegistration] = useState('');
-    const [auxiliarName, setAuxiliarName] = useState(''); // Alterado de "team" para "auxiliarName"
+    const [unit, setUnit] = useState(''); // Novo campo unidade
+    const [vehiclePlate, setVehiclePlate] = useState(''); // Novo campo placa do veículo
+    const [auxiliarName, setAuxiliarName] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const { login } = useContext(AuthContext);
 
     const handleLogin = async () => {
-        if (!name.trim() || !registration.trim()) {
-            Alert.alert('Erro', 'Nome e Matrícula são obrigatórios');
+        if (!name.trim() || !auxiliarName.trim()) {
+            Alert.alert('Erro', 'Nome do Operador e Nome do Auxiliar são obrigatórios');
             return;
         }
 
@@ -31,7 +32,8 @@ const LoginScreen = () => {
             // Cargo fixo como "Operador"
             const position = "Operador";
 
-            const result = await login(name, registration, position, auxiliarName);
+            // Adapte o login conforme necessário para os novos campos
+            const result = await login(name, position, unit, vehiclePlate, auxiliarName);
 
             if (!result.success) {
                 Alert.alert('Erro', 'Não foi possível fazer login. Tente novamente.');
@@ -48,8 +50,12 @@ const LoginScreen = () => {
         <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={styles.container}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0} // Adicionado offset
         >
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <ScrollView
+                contentContainerStyle={styles.scrollContainer}
+                keyboardShouldPersistTaps="handled" // Garante que o teclado não feche ao tocar nos campos
+            >
                 <View style={styles.formContainer}>
                     <View style={styles.logoContainer}>
                         <Text style={styles.logoText}>SISCOP</Text>
@@ -68,23 +74,34 @@ const LoginScreen = () => {
                     </View>
 
                     <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Matrícula*</Text>
+                        <Text style={styles.label}>Nome da Unidade</Text>
                         <TextInput
                             style={styles.input}
-                            value={registration}
-                            onChangeText={setRegistration}
-                            placeholder="Digite sua matrícula"
-                            keyboardType="numeric"
+                            value={unit}
+                            onChangeText={setUnit}
+                            placeholder="Ex: UCAQ"
+                            autoCapitalize="characters"
                         />
                     </View>
 
                     <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Nome do Auxiliar (opcional)</Text>
+                        <Text style={styles.label}>Placa do Veículo</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={vehiclePlate}
+                            onChangeText={setVehiclePlate}
+                            placeholder="Digite a placa do veículo"
+                            autoCapitalize="characters"
+                        />
+                    </View>
+
+                    <View style={styles.inputContainer}>
+                        <Text style={styles.label}>Nome do Auxiliar*</Text>
                         <TextInput
                             style={styles.input}
                             value={auxiliarName}
                             onChangeText={setAuxiliarName}
-                            placeholder="Digite o nome do auxiliar (se houver)"
+                            placeholder="Digite o nome do auxiliar"
                             autoCapitalize="words"
                         />
                     </View>

@@ -61,21 +61,29 @@ const UserHeader = () => {
                     <View style={styles.userInfo}>
                         <Text style={styles.userName}>{userData?.name || 'Operador'}</Text>
 
+                        {/* Unidade */}
                         <View style={styles.detailsRow}>
-                            <Ionicons name="card-outline" size={14} color="#e0e0e0" />
+                            <Ionicons name="business-outline" size={14} color="#e0e0e0" />
                             <Text style={styles.userDetails}>
-                                {userData?.registration || 'Sem matrícula'}
+                                Unidade: {userData?.unit || '---'}
                             </Text>
                         </View>
 
-                        {userData?.auxiliarName ? (
-                            <View style={styles.detailsRow}>
-                                <Ionicons name="people-outline" size={14} color="#e0e0e0" />
-                                <Text style={styles.userDetails}>
-                                    Auxiliar: {userData.auxiliarName}
-                                </Text>
-                            </View>
-                        ) : null}
+                        {/* Placa do veículo */}
+                        <View style={styles.detailsRow}>
+                            <Ionicons name="car-outline" size={14} color="#e0e0e0" />
+                            <Text style={styles.userDetails}>
+                                Placa: {userData?.vehiclePlate || '---'}
+                            </Text>
+                        </View>
+
+                        {/* Auxiliar */}
+                        <View style={styles.detailsRow}>
+                            <Ionicons name="people-outline" size={14} color="#e0e0e0" />
+                            <Text style={styles.userDetails}>
+                                Auxiliar: {userData?.auxiliarName || '---'}
+                            </Text>
+                        </View>
                     </View>
                 </View>
 
